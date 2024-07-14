@@ -2,6 +2,8 @@
 
 from operator import floordiv, mod
 
+learning_
+
 def divide_exact(n, d=10):
     """Return the quotient and remainder of dividing N by D
     

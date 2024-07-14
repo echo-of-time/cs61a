@@ -171,34 +171,14 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
     "*** YOUR CODE HERE ***"
    
     while score0 < goal and score1 < goal:
+        # Player 0's turn
         score0 = player_turn(strategy0, score0, score1, dice, goal)
         if score0 >= goal:
             return score0, score1
+        # Player 1's turn
         score1 = player_turn(strategy1, score1, score0, dice, goal)
         if score1 >= goal:
             return score0, score1
-    # while score0 < goal and score1 < goal:
-    #     # Player 0's turn
-    #     num_rolls0 = strategy0(score0, score1)
-    #     score0 += take_turn(num_rolls0, score1, dice)
-    #     if score0 >= goal:
-    #         return score0, score1
-    #     while extra_turn(score0, score1):
-    #         num_rolls0 = strategy0(score0, score1)
-    #         score0 += take_turn(num_rolls0, score1, dice)
-    #         if score0 >= goal:
-    #             return score0, score1
-            
-    #     # Player 1's turn
-    #     num_rolls1 = strategy1(score1, score0)
-    #     score1 += take_turn(num_rolls1, score0, dice)
-    #     if score1 >= goal:
-    #         return score0, score1
-    #     while extra_turn(score1, score0):
-    #         num_rolls1 = strategy1(score1, score0)
-    #         score1 += take_turn(num_rolls1, score0, dice)
-    #         if score1 >= goal:
-    #             return score0, score1
             
     # END PROBLEM 5
     # (note that the indentation for the problem 6 prompt (***YOUR CODE HERE***) might be misleading)
