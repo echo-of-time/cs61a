@@ -172,13 +172,15 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
    
     while score0 < goal and score1 < goal:
         # Player 0's turn
-        score0 = player_turn(strategy0, score0, score1, dice, goal)
+        score0, say = player_turn(strategy0, score0, score1, dice, goal, say, who)
+        who = other(who)
         if score0 >= goal:
             return score0, score1
         # Player 1's turn
-        score1 = player_turn(strategy1, score1, score0, dice, goal)
+        score1, say = player_turn(strategy1, score1, score0, dice, goal, say, who)
         if score1 >= goal:
             return score0, score1
+        who = other(who)
             
     # END PROBLEM 5
     # (note that the indentation for the problem 6 prompt (***YOUR CODE HERE***) might be misleading)
@@ -187,18 +189,26 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
     # END PROBLEM 6
     return score0, score1
  
-def player_turn(strategy, score, opponent_score, dice, goal):
+def player_turn(strategy, score, opponent_score, dice, goal, say, who):
     '''Simulate a player's turn. Return the player's score after the turn.'''
     num_rolls = strategy(score, opponent_score)
     score += take_turn(num_rolls, opponent_score, dice)
+    if who == 0:
+        say = say(score, opponent_score)
+    else:
+        say = say(opponent_score, score)
     if score >= goal:
-        return score
+        return score, say
     while extra_turn(score, opponent_score):
         num_rolls = strategy(score, opponent_score)
         score += take_turn(num_rolls, opponent_score, dice)
+        if who == 0:
+            say = say(score, opponent_score)
+        else:
+            say = say(opponent_score, score)
         if score >= goal:
-            return score
-    return score
+            return score, say
+    return score, say
 
 #######################
 # Phase 2: Commentary #
@@ -280,6 +290,28 @@ def announce_highest(who, last_score=0, running_high=0):
     assert who == 0 or who == 1, 'The who argument should indicate a player.'
     # BEGIN PROBLEM 7
     "*** YOUR CODE HERE ***"
+    def say(score0, score1):
+        if who == 0:
+            if score0 > last_score:
+                diff = score0 - last_score
+                if diff > running_high:
+                    print(diff, "point(s)! The most yet for Player 0")
+                    return announce_highest(who, score0, diff)
+                else:
+                    return announce_highest(who, score0, running_high)
+            else:
+                return announce_highest(who, score0, running_high)
+        else:
+            if score1 > last_score:
+                diff = score1 - last_score
+                if diff > running_high:
+                    print(diff, "point(s)! The most yet for Player 1")
+                    return announce_highest(who, score1, diff)
+                else:
+                    return announce_highest(who, score1, running_high)
+            else:
+                return announce_highest(who, score1, running_high)
+    return say
     # END PROBLEM 7
 
 
@@ -320,6 +352,12 @@ def make_averaged(original_function, trials_count=1000):
     """
     # BEGIN PROBLEM 8
     "*** YOUR CODE HERE ***"
+    def ave(*args):
+        sum = 0
+        for i in range(trials_count):
+            sum += original_function(*args)
+        return sum / trials_count
+    return ave
     # END PROBLEM 8
 
 
@@ -334,6 +372,18 @@ def max_scoring_num_rolls(dice=six_sided, trials_count=1000):
     """
     # BEGIN PROBLEM 9
     "*** YOUR CODE HERE ***"
+    max_scoring_num_rolls_ = 1
+    max_score = 0
+    # traverse from 1 to 10
+    for i in range(1, 11):
+        ave = make_averaged(roll_dice, trials_count)
+        # dice function must be passed as a parameter once each iteration
+        # need i_score to recored the average score of i rolls
+        i_score = ave(i, dice) 
+        if i_score > max_score:
+            max_scoring_num_rolls_ = i
+            max_score = i_score
+    return max_scoring_num_rolls_
     # END PROBLEM 9
 
 
@@ -383,7 +433,9 @@ def bacon_strategy(score, opponent_score, cutoff=8, num_rolls=6):
     rolls NUM_ROLLS otherwise.
     """
     # BEGIN PROBLEM 10
-    return 6  # Replace this statement
+    if free_bacon(opponent_score) >= cutoff:
+        return 0
+    return num_rolls
     # END PROBLEM 10
 
 
@@ -393,7 +445,11 @@ def extra_turn_strategy(score, opponent_score, cutoff=8, num_rolls=6):
     Otherwise, it rolls NUM_ROLLS.
     """
     # BEGIN PROBLEM 11
-    return 6  # Replace this statement
+    score_temp = score + free_bacon(opponent_score)
+    if extra_turn(score_temp, opponent_score):
+        return 0
+    else:
+        return bacon_strategy(score, opponent_score, cutoff, num_rolls)
     # END PROBLEM 11
 
 
